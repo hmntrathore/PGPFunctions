@@ -18,16 +18,24 @@ namespace hmnt.Function
             ILogger log)
          {
             log.LogInformation($"C# HTTP trigger function {nameof(PGPSign)} received a request.");
+            LogDetail logDetail = new LogDetail();
+
            
             req.Headers.TryGetValue("correlationID", out var correlationID);
             log.LogInformation($"C# HTTP trigger function {nameof(PGPSign)}correlation value {correlationID}");
+            logDetail.CorrelationID = correlationID;
+            logDetail.LogDateTime =DateTime.Now;
+            logDetail.LogKey="PGPSign";
+            logDetail.LogValue ="Called PGP";
+            logDetail.LogType = "Information";            
            
             string privateKey = PGPHelper.GetStringFromBase64(Environment.GetEnvironmentVariable("SourcePrivateKeyBase64"));
             string passPhrase = Environment.GetEnvironmentVariable("passPhrase");
             req.EnableBuffering(); //Make RequestBody Stream seekable
             Stream encryptedData ;
            
-            encryptedData = await PGPHelper.SignAsync(req.Body, privateKey,passPhrase);            
+            encryptedData = await PGPHelper.SignAsync(req.Body, privateKey,passPhrase);       
+            LogProcessor.processLog(logDetail)     ;
                   
 
 
